@@ -79,6 +79,19 @@ tags:
 - 목록 인터랙션: `components/article-explorer.tsx`
 - 글 상세 페이지: `app/articles/[...slug]/page.tsx`
 
+## 같은 느낌의 글을 쓰는 도구
+
+`AI와 GitHub, Vercel로 이 블로그를 만든 순서` 같은 톤의 글을 반복해서 쓰고 싶다면 아래 도구를 쓰면 됩니다.
+
+```bash
+npm.cmd run new:process-log
+```
+
+이 명령은 카테고리, 제목, 요약, 태그를 물어본 뒤 `content/<카테고리>/YYYY-MM-DD-슬러그.md` 파일을 자동으로 만들고,
+본문에는 같은 느낌으로 쓰기 위한 섹션 구조와 숨은 작성 지침을 함께 넣어줍니다.
+
+스타일 설명은 `docs/PROCESS_LOG_STYLE_GUIDE.md`에 정리되어 있습니다.
+
 ## 배포
 
 1. GitHub 저장소에 푸시합니다.
