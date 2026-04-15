@@ -47,7 +47,9 @@ export const siteConfig = {
   title: "생각과 작업을 쌓는 블로그",
   description:
     "AI, 자동화, 경제, 리뷰, 기타 다섯 카테고리로 기록을 정리하는 마크다운 기반 정적 블로그입니다.",
-  author: "작성자 이름 — GitHub와 Vercel로 운영하는 개인 아카이브",
+  authorLead: "이것저것",
+  authorAccent: "모아",
+  authorTail: "만든 아카이브",
   authorIcon: "✦",
   statusLabel: "카테고리형 블로그",
   countSuffix: "개의 글",

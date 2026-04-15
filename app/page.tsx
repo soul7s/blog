@@ -29,9 +29,13 @@ export default function Home() {
           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--ep-num-bg)] text-xs">
             {siteConfig.authorIcon}
           </div>
-          <span className="text-xs text-[var(--muted-text)]">
-            {siteConfig.author}
-          </span>
+          <div className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--muted-text)]">
+            <span>{siteConfig.authorLead}</span>
+            <span className="rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/12 px-2 py-0.5 text-[var(--gold)] font-semibold tracking-[0.04em] shadow-[0_0_0_1px_rgba(212,160,23,0.06)]">
+              {siteConfig.authorAccent}
+            </span>
+            <span>{siteConfig.authorTail}</span>
+          </div>
         </div>
       </header>
 
