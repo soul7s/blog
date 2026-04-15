@@ -138,7 +138,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {article.sectionLabel}
             </span>
           ) : null}
-          <span className="text-xs text-[var(--muted-text)]">{article.date}</span>
+          <span className="text-xs text-[var(--muted-text)]">
+            {article.displayDate}
+          </span>
         </div>
         <h1 className="mb-4 text-xl font-bold leading-tight text-[var(--text)] sm:text-2xl">
           {article.title}

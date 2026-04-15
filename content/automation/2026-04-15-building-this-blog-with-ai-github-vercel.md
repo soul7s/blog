@@ -1,6 +1,7 @@
 ---
 title: "AI와 GitHub, Vercel로 이 블로그를 만든 순서"
 summary: "나중에 같은 방식으로 다시 만들 때 헤매지 않도록, 디자인 선택부터 Codex 요청, GitHub 업로드, Vercel 배포, 그리고 이후 글 작성 흐름까지 실제 순서대로 정리한 기록이다."
+publishedAt: "2026-04-15T21:30:00+09:00"
 tags:
   - 블로그
   - Next.js

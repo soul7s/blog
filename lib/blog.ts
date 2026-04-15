@@ -14,6 +14,7 @@ const ARTICLE_FILENAME_PATTERN = /^(\d{4}-\d{2}-\d{2})-(.+)\.md$/;
 type Frontmatter = {
   date?: string;
   draft?: boolean;
+  publishedAt?: string | Date;
   summary?: string;
   description?: string;
   tags?: string[] | string;
@@ -25,13 +26,16 @@ export type Article = {
   categoryLabel: string;
   content: string;
   date: string;
+  displayDate: string;
   filePath: string;
   id: string;
   locationLabel: string;
   orderLabel: string;
+  publishedAt: string;
   routeSegments: string[];
   sectionLabel: string | null;
   slug: string;
+  sortValue: number;
   summary: string;
   tags: string[];
   title: string;
@@ -43,9 +47,11 @@ export type ArticlePreview = Pick<
   | "categoryKey"
   | "categoryLabel"
   | "date"
+  | "displayDate"
   | "id"
   | "locationLabel"
   | "orderLabel"
+  | "publishedAt"
   | "sectionLabel"
   | "summary"
   | "tags"
@@ -97,11 +103,109 @@ function normaliseTags(tags: Frontmatter["tags"]): string[] {
     .filter(Boolean);
 }
 
+function normaliseFrontmatterValue(value: string | Date | undefined) {
+  if (!value) {
+    return undefined;
+  }
+
+  if (value instanceof Date) {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).formatToParts(value);
+
+    const year = parts.find((part) => part.type === "year")?.value ?? "";
+    const month = parts.find((part) => part.type === "month")?.value ?? "";
+    const day = parts.find((part) => part.type === "day")?.value ?? "";
+    const hour = parts.find((part) => part.type === "hour")?.value ?? "00";
+    const minute =
+      parts.find((part) => part.type === "minute")?.value ?? "00";
+    const second =
+      parts.find((part) => part.type === "second")?.value ?? "00";
+
+    return `${year}-${month}-${day}T${hour}:${minute}:${second}+09:00`;
+  }
+
+  return value.trim();
+}
+
 function prettifySegment(value: string) {
   return value
     .replace(/-/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function normalisePublishedAt(value: string, fallbackDate: string) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return `${value}T00:00:00+09:00`;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}$/.test(value)) {
+    return `${value.replace(" ", "T")}:00+09:00`;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/.test(value)) {
+    return `${value.replace(" ", "T")}+09:00`;
+  }
+
+  if (
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
+      value,
+    )
+  ) {
+    return value;
+  }
+
+  if (!value) {
+    return `${fallbackDate}T00:00:00+09:00`;
+  }
+
+  throw new Error(
+    `publishedAt 형식이 잘못되었습니다. "YYYY-MM-DD HH:mm" 또는 ISO 형식을 사용하세요: ${value}`,
+  );
+}
+
+function formatDateParts(date: Date, options: Intl.DateTimeFormatOptions) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    ...options,
+  }).formatToParts(date);
+}
+
+function buildPublishedLabel(date: Date, hasExplicitTime: boolean) {
+  const dateParts = formatDateParts(date, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+
+  const year = dateParts.find((part) => part.type === "year")?.value ?? "";
+  const month = dateParts.find((part) => part.type === "month")?.value ?? "";
+  const day = dateParts.find((part) => part.type === "day")?.value ?? "";
+  const baseLabel = `${year}-${month}-${day}`;
+
+  if (!hasExplicitTime) {
+    return baseLabel;
+  }
+
+  const timeParts = formatDateParts(date, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const hour = timeParts.find((part) => part.type === "hour")?.value ?? "00";
+  const minute =
+    timeParts.find((part) => part.type === "minute")?.value ?? "00";
+
+  return `${baseLabel} ${hour}:${minute}`;
 }
 
 function extractExcerpt(markdown: string) {
@@ -177,6 +281,29 @@ function readArticle(filePath: string): Article | null {
     );
   }
 
+  const publishedAtInput = normaliseFrontmatterValue(frontmatter.publishedAt);
+  const normalisedPublishedAt = normalisePublishedAt(
+    publishedAtInput ?? date,
+    date,
+  );
+  const publishedDatePart = normalisedPublishedAt.slice(0, 10);
+
+  if (publishedDatePart !== date) {
+    throw new Error(
+      `publishedAt 날짜와 파일명 날짜가 다릅니다: ${relativePath}`,
+    );
+  }
+
+  const publishedDate = new Date(normalisedPublishedAt);
+
+  if (Number.isNaN(publishedDate.getTime())) {
+    throw new Error(`publishedAt 값을 해석할 수 없습니다: ${relativePath}`);
+  }
+
+  const hasExplicitTime = Boolean(
+    publishedAtInput && !/^\d{4}-\d{2}-\d{2}$/.test(publishedAtInput),
+  );
+
   const sectionSegments = directorySegments.slice(1);
   const sectionLabel = sectionSegments.length
     ? sectionSegments.map(prettifySegment).join(" / ")
@@ -198,13 +325,16 @@ function readArticle(filePath: string): Article | null {
     categoryLabel: category.label,
     content,
     date,
+    displayDate: buildPublishedLabel(publishedDate, hasExplicitTime),
     filePath,
     id: routeSegments.join("/"),
     locationLabel,
     orderLabel: "",
+    publishedAt: normalisedPublishedAt,
     routeSegments,
     sectionLabel,
     slug,
+    sortValue: publishedDate.getTime(),
     summary,
     tags,
     title,
@@ -215,11 +345,11 @@ function readArticle(filePath: string): Article | null {
 }
 
 function compareArticles(left: Article, right: Article) {
-  if (left.date === right.date) {
+  if (left.sortValue === right.sortValue) {
     return right.id.localeCompare(left.id, "ko-KR");
   }
 
-  return right.date.localeCompare(left.date);
+  return right.sortValue - left.sortValue;
 }
 
 function loadArticles() {
@@ -291,10 +421,12 @@ export function toArticlePreview(article: Article): ArticlePreview {
     categoryKey: article.categoryKey,
     categoryLabel: article.categoryLabel,
     date: article.date,
+    displayDate: article.displayDate,
     filterTokens: [`category:${article.categoryKey}`],
     id: article.id,
     locationLabel: article.locationLabel,
     orderLabel: article.orderLabel,
+    publishedAt: article.publishedAt,
     sectionLabel: article.sectionLabel,
     summary: article.summary,
     tags: article.tags,

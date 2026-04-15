@@ -69,7 +69,7 @@ export function ArticleExplorer({ articles, filters }: ArticleExplorerProps) {
                   </p>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs text-[var(--muted-text)]">
-                      {article.date}
+                      {article.displayDate}
                     </span>
                     <span className="text-xs text-[var(--muted-bg)]">·</span>
                     <span className="rounded-md bg-[var(--ep-num-bg)] px-2 py-0.5 text-xs text-[var(--muted-text)]">

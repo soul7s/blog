@@ -41,16 +41,70 @@ function toSlug(value) {
     .normalize("NFC")
     .trim()
     .toLowerCase()
-    .replace(/[‘’'"]/g, "")
+    .replace(/['"]/g, "")
     .replace(/[^\p{Letter}\p{Number}\s-]/gu, " ")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
 }
 
+function getSeoulNowParts(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  const read = (type) => parts.find((part) => part.type === type)?.value ?? "";
+
+  return {
+    date: `${read("year")}-${read("month")}-${read("day")}`,
+    time: `${read("hour")}:${read("minute")}`,
+    seconds: read("second") || "00",
+  };
+}
+
+function normalisePublishedAtInput(value) {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    const now = getSeoulNowParts();
+    return `${now.date}T${now.time}:${now.seconds}+09:00`;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return `${trimmed}T09:00:00+09:00`;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}$/.test(trimmed)) {
+    return `${trimmed.replace(" ", "T")}:00+09:00`;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
+    return `${trimmed.replace(" ", "T")}+09:00`;
+  }
+
+  if (
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(
+      trimmed,
+    )
+  ) {
+    return trimmed;
+  }
+
+  throw new Error(
+    '발행 시각은 "YYYY-MM-DD HH:mm" 또는 ISO 형식으로 입력해 주세요.',
+  );
+}
+
 function toTagLines(tags) {
   if (!tags.length) {
-    return 'tags:\n  - 기록';
+    return "tags:\n  - 기록";
   }
 
   return ["tags:", ...tags.map((tag) => `  - ${tag}`)].join("\n");
@@ -58,98 +112,97 @@ function toTagLines(tags) {
 
 function toReferenceList(references) {
   if (!references.length) {
-    return "- 참고 링크나 자료가 있다면 여기에 추가";
+    return "- 참고 링크가 없다면, 어떤 자료를 기준으로 정리했는지 한 줄 메모";
   }
 
   return references.map((reference) => `- ${reference}`).join("\n");
 }
 
 function createTemplate({
-  title,
+  articleType,
+  publishedAt,
+  references,
   summary,
   tags,
-  references,
-  articleType,
+  title,
 }) {
   const openingLine =
     articleType === "review"
-      ? "이 글은 감상문보다 판단 기록에 가깝다. 나중에 같은 대상을 다시 볼 때, 무엇이 좋았고 무엇이 아쉬웠는지 빠르게 떠올리려고 남겨둔다."
-      : "이 글은 감상보다 작업 기록에 가깝다. 다음에 같은 작업을 다시 할 때, 어디서 막혔고 무엇을 먼저 해야 하는지 헷갈리지 않으려고 순서대로 남겨둔다.";
+      ? "이 글은 감상문보다 판단 기록에 가깝다. 무엇이 좋았는지보다 어떤 기준으로 보고, 어디까지 추천할 수 있는지를 남긴다."
+      : "이 글은 결과 자랑보다 작업 기록에 가깝다. 다음에 같은 일을 다시 할 때 빠르게 따라갈 수 있도록 순서와 판단 이유를 남긴다.";
 
   const reminderLine =
     articleType === "review"
-      ? "정리하면, 핵심은 좋고 나쁨을 말하는 것이 아니라 어떤 사람에게 왜 맞거나 안 맞는지를 남기는 것이다."
-      : '정리하면, 핵심은 "무엇을 했는지"보다 "왜 그 순서로 했는지"를 남겨서 다음 작업 비용을 줄이는 것이다.';
+      ? "정리하면, 이 글의 목적은 호불호를 크게 말하는 것이 아니라 어떤 사람에게 맞고 어떤 상황에서 애매한지까지 남기는 것이다."
+      : "정리하면, 이 글의 목적은 무엇을 했는지보다 왜 그 순서로 했는지를 남겨 다음 작업 비용을 줄이는 것이다.";
 
   return `---
 title: "${title}"
 summary: "${summary}"
+publishedAt: "${publishedAt}"
 ${toTagLines(tags)}
 ---
 
 <!--
 process-log writing rules
 1. 한 문단은 1~3문장으로 짧게 쓴다.
-2. 감상보다 작업 기록, 판단 기록, 복기 메모에 가깝게 쓴다.
+2. 감상보다 과정, 과정보다 판단 근거를 우선한다.
 3. "무엇을 했다" 다음에는 "왜 그렇게 했다"를 붙인다.
-4. 과장된 표현보다 실제 순서, 기준, 실수를 적는다.
-5. 마지막에는 다음에 다시 볼 사람을 위한 체크리스트를 남긴다.
+4. 막힌 지점, 수정 이유, 다시 볼 포인트를 꼭 남긴다.
+5. 마지막에는 다음에 다시 볼 사람을 위한 메모를 적는다.
 -->
 
 > ${openingLine}
 
-## 참고한 자료
+## 참고한 재료
 
 ${toReferenceList(references)}
 
-## 이 글에서 다루는 것
+## 이 글에서 남길 것
 
-- 이 글이 어떤 작업이나 판단을 다루는지 한 줄로 적기
-- 독자가 이 글을 읽고 무엇을 바로 따라 할 수 있는지 적기
+- 이 글이 다루는 작업이나 판단의 범위
+- 읽는 사람이 바로 따라갈 수 있는 순서
+- 나중에 다시 봤을 때 도움이 되는 기준
 
-## 준비물
+## 준비한 것
 
-- 필요한 도구
-- 필요한 계정이나 환경
-- 시작 전에 알고 있어야 할 것
+- 필요한 도구, 계정, 환경
+- 시작 전에 이미 정해져 있던 조건
+- 먼저 확인해야 하는 제한 사항
 
 ## 전체 흐름 한눈에 보기
 
-1. 첫 단계
-2. 두 번째 단계
-3. 테스트나 검토
-4. 마무리
+1. 배경 정리
+2. 실제로 한 일
+3. 선택한 이유
+4. 테스트와 수정
+5. 적용 또는 배포
 
 ## 1. 시작 배경
 
-<!-- 여기서는 왜 이 작업을 하게 됐는지, 어떤 문제가 있었는지 짧게 쓴다. -->
-이 작업을 시작한 이유와 당시 상황을 적는다.
+왜 이 작업을 하게 됐는지, 무엇이 불편했는지 짧게 적는다.
 
 ## 2. 실제로 한 일
 
-<!-- 여기서는 실제로 무엇을 했는지 순서대로 쓴다. -->
-처음에 무엇을 했고, 왜 그 순서를 택했는지 적는다.
+처음에 무엇부터 봤는지, 어떤 순서로 진행했는지 적는다.
 
-## 3. 이 선택이 실제로 뜻하는 것
+## 3. 왜 그렇게 했는지
 
-<!-- 단순 작업 설명이 아니라, 그 선택이 어떤 구조를 만든 것인지 풀어쓴다. -->
-겉으로 보기엔 단순한 선택이지만 실제로 어떤 조건을 만족시키는지 정리한다.
+겉으로 보기에는 단순해 보여도, 실제로는 어떤 조건과 판단 기준이 있었는지 남긴다.
 
-## 4. 테스트하고 수정한 부분
+## 4. 테스트와 수정한 부분
 
-<!-- 초안이나 첫 시도에서 어색했던 점, 다시 손본 이유를 적는다. -->
-직접 확인하면서 어색했던 지점과 수정한 이유를 남긴다.
+직접 확인하면서 어색했던 점과 손본 이유를 적는다.
 
-## 5. 적용하거나 배포한 방식
+## 5. 적용 후 남는 메모
 
-<!-- 로컬에서 끝나지 않고 실제 적용까지 이어졌다면 그 흐름을 적는다. -->
-정리된 결과를 어디에 반영했고, 이후 관리가 어떻게 쉬워졌는지 적는다.
+배포, 반영, 운영 관점에서 나중에 다시 봐야 할 포인트를 적는다.
 
-## 실수하지 않으려고 남기는 메모
+## 다음에 다시 볼 메모
 
-- 다음에 다시 할 때 꼭 먼저 확인할 것
-- 먼저 정해두면 편한 규칙
-- 중간에 헷갈리기 쉬운 지점
+- 다음 번에는 무엇부터 확인할지
+- 반복 실수를 줄이기 위한 기준 한 줄
+- 중간에 놓치기 쉬운 체크포인트
 
 ## 마무리
 
@@ -167,8 +220,7 @@ async function promptForMissingValues(initialArgs) {
   const category =
     initialArgs.category ??
     (await rl.question(`카테고리 [${categoryChoicesText}]: `)).trim();
-  const title =
-    initialArgs.title ?? (await rl.question("글 제목: ")).trim();
+  const title = initialArgs.title ?? (await rl.question("글 제목: ")).trim();
   const summary =
     initialArgs.summary ?? (await rl.question("한 줄 요약: ")).trim();
   const tagsInput =
@@ -177,9 +229,15 @@ async function promptForMissingValues(initialArgs) {
   const referencesInput =
     initialArgs.references ??
     (await rl.question("참고 링크 (쉼표로 구분, 비워도 됨): ")).trim();
-  const date =
+  const publishedAtInput =
+    initialArgs["published-at"] ??
+    initialArgs.publishedAt ??
     initialArgs.date ??
-    (await rl.question("날짜 (YYYY-MM-DD, 비우면 오늘): ")).trim();
+    (
+      await rl.question(
+        "발행 시각 (YYYY-MM-DD HH:mm, 비우면 현재 시각): ",
+      )
+    ).trim();
   const slug =
     initialArgs.slug ??
     (await rl.question("슬러그 (비우면 제목 기준 생성): ")).trim();
@@ -188,7 +246,7 @@ async function promptForMissingValues(initialArgs) {
 
   return {
     category,
-    date,
+    publishedAtInput,
     referencesInput,
     slug,
     summary,
@@ -200,7 +258,6 @@ async function promptForMissingValues(initialArgs) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const answers = await promptForMissingValues(args);
-
   const category = answers.category;
 
   if (!Object.hasOwn(CATEGORY_CHOICES, category)) {
@@ -217,14 +274,12 @@ async function main() {
     throw new Error("요약은 비워둘 수 없습니다.");
   }
 
-  const date =
-    answers.date ||
-    new Date().toISOString().slice(0, 10);
-
+  const publishedAt = normalisePublishedAtInput(answers.publishedAtInput || "");
+  const date = publishedAt.slice(0, 10);
   const slug = answers.slug || toSlug(answers.title);
 
   if (!slug) {
-    throw new Error("슬러그를 만들 수 없습니다. --slug 값을 직접 넣어주세요.");
+    throw new Error("슬러그를 만들 수 없습니다. --slug 값을 직접 넣어 주세요.");
   }
 
   const tags = answers.tagsInput
@@ -254,6 +309,7 @@ async function main() {
   const articleType = category === "review" ? "review" : "process";
   const template = createTemplate({
     articleType,
+    publishedAt,
     references,
     summary: answers.summary,
     tags,

@@ -98,3 +98,21 @@ npm.cmd run new:process-log
 2. Vercel에서 저장소를 연결합니다.
 3. 빌드 명령은 기본값인 `next build`를 그대로 사용합니다.
 4. 이 프로젝트는 `output: "export"` 설정으로 정적 HTML을 생성합니다.
+## Time-based ordering
+
+- Articles are sorted by `publishedAt` in descending order.
+- Keep the filename rule as `YYYY-MM-DD-slug.md`.
+- The date part of the filename must match the date part of `publishedAt`.
+- Recommended frontmatter example:
+
+```md
+---
+title: "생각 정리"
+summary: "같은 날 여러 글을 올려도 최신순이 자연스럽게 유지되도록 작성합니다."
+publishedAt: "2026-04-15T21:30:00+09:00"
+tags:
+  - 기록
+---
+```
+
+- `npm.cmd run new:process-log` now asks for a publish time and writes `publishedAt` automatically.
