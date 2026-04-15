@@ -44,7 +44,7 @@ export const blogCategoryMap = new Map(
 );
 
 export const siteConfig = {
-  title: '생각과 작업을 쌓는 "모아"님의 블로그',
+  title: "생각과 작업을 쌓는 모아님의 블로그",
   description:
     "AI, 자동화, 경제, 리뷰, 기타 다섯 카테고리로 기록을 정리하는 마크다운 기반 정적 블로그입니다.",
   authorLead: "이것저것",
