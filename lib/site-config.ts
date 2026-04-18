@@ -3,12 +3,14 @@ export type CategoryKey =
   | "automation"
   | "economy"
   | "review"
-  | "misc";
+  | "misc"
+  | "blog";
 
 export type BlogCategory = {
   key: CategoryKey;
   label: string;
   description: string;
+  hidden?: boolean;
 };
 
 export const blogCategories: BlogCategory[] = [
@@ -36,6 +38,12 @@ export const blogCategories: BlogCategory[] = [
     key: "misc",
     label: "기타",
     description: "분류 밖에 있지만 남길 가치가 있는 메모를 모읍니다.",
+  },
+  {
+    key: "blog",
+    label: "블로그",
+    description: "네이버 블로그 변환용 글을 보관하는 숨김 카테고리입니다.",
+    hidden: true,
   },
 ];
 

@@ -234,6 +234,11 @@ function resolveCategory(categoryKey: string) {
   return blogCategoryMap.get(categoryKey as CategoryKey) ?? null;
 }
 
+function isVisibleCategory(categoryKey: string) {
+  const category = resolveCategory(categoryKey);
+  return Boolean(category && !category.hidden);
+}
+
 function readArticle(filePath: string): Article | null {
   const relativePath = path.relative(CONTENT_DIR, filePath);
   const directoryPath = path.dirname(relativePath);
@@ -373,6 +378,10 @@ function loadArticles() {
 }
 
 export function getAllArticles() {
+  return loadArticles().filter((article) => isVisibleCategory(article.categoryKey));
+}
+
+export function getAllArticlesIncludingHidden() {
   return loadArticles();
 }
 
@@ -381,7 +390,7 @@ export function getArticleBySlug(slugSegments: string[]) {
     decodeURIComponent(segment),
   );
 
-  return loadArticles().find(
+  return getAllArticlesIncludingHidden().find(
     (article) =>
       article.routeSegments.length === normalisedSegments.length &&
       article.routeSegments.every(
@@ -391,7 +400,7 @@ export function getArticleBySlug(slugSegments: string[]) {
 }
 
 export function getAdjacentArticles(articleId: string) {
-  const articles = loadArticles();
+  const articles = getAllArticles();
   const currentIndex = articles.findIndex((article) => article.id === articleId);
 
   if (currentIndex === -1) {
@@ -408,7 +417,9 @@ export function getAdjacentArticles(articleId: string) {
 }
 
 export function getFilterOptions(): FilterOption[] {
-  const categoryOptions = blogCategories.map((category) => ({
+  const categoryOptions = blogCategories
+    .filter((category) => !category.hidden)
+    .map((category) => ({
     label: category.label,
     value: `category:${category.key}`,
   }));
