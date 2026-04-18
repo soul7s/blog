@@ -1,6 +1,7 @@
 import { ArticleExplorer } from "@/components/article-explorer";
 import { getAllArticles, getFilterOptions, toArticlePreview } from "@/lib/blog";
 import { siteConfig } from "@/lib/site-config";
+import Link from "next/link";
 
 export default function Home() {
   const articles = getAllArticles();
@@ -42,9 +43,17 @@ export default function Home() {
       <div className="mb-8 border-t border-[var(--border)]" />
 
       <div className="mb-6">
-        <h2 className="text-lg font-semibold text-[var(--text)]">
-          {siteConfig.feedTitle}
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-[var(--text)]">
+            {siteConfig.feedTitle}
+          </h2>
+          <Link
+            href="/blog"
+            className="rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-3 py-1 text-xs font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--bg)]"
+          >
+            블로그 변환본
+          </Link>
+        </div>
       </div>
 
       <ArticleExplorer articles={previews} filters={filters} />
