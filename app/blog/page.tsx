@@ -30,16 +30,10 @@ export default function HiddenBlogPage() {
           </div>
         ) : null}
 
-        {articles.map((article, index) => (
+        {articles.map((article) => (
           <Link key={article.id} className="group block" href={article.urlPath}>
             <article className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 transition-all duration-200 hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)]">
               <div className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--ep-num-bg)]">
-                  <span className="text-sm font-bold text-[var(--gold)]">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-
                 <div className="min-w-0 flex-1">
                   <h2 className="mb-1 text-base font-semibold leading-snug text-[var(--text)] transition-colors group-hover:text-[var(--gold)]">
                     {article.title}

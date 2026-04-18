@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import {
   getAdjacentArticles,
   getAllArticles,
+  getAllArticlesIncludingHidden,
   getArticleBySlug,
   renderMarkdown,
 } from "@/lib/blog";
@@ -72,7 +73,7 @@ function ArticleNavigationCard({
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getAllArticles().map((article) => ({
+  return getAllArticlesIncludingHidden().map((article) => ({
     slug: article.routeSegments,
   }));
 }
@@ -102,12 +103,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }
 
   const html = await renderMarkdown(article.content);
-  const { newer, older } = getAdjacentArticles(article.id);
+  const isHiddenBlog = article.categoryKey === "blog";
+  const { newer, older } = isHiddenBlog
+    ? { newer: null, older: null }
+    : getAdjacentArticles(article.id);
 
   return (
     <main className="py-12">
       <Link
-        href="/"
+        href={isHiddenBlog ? "/blog" : "/"}
         className="mb-10 inline-flex items-center gap-1.5 text-sm text-[var(--muted-text)] transition-colors hover:text-[var(--gold)]"
       >
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
@@ -119,16 +123,25 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             strokeWidth="1.5"
           />
         </svg>
-        목록으로
+        {isHiddenBlog ? "변환본 목록으로" : "목록으로"}
       </Link>
 
       <header className="mb-10">
-        <div className="mb-4 flex items-center gap-3">
-          <span className="text-2xl font-bold text-[var(--gold)]">
-            POST {article.orderLabel}
-          </span>
-          <div className="h-px flex-1 bg-[var(--border)]" />
-        </div>
+        {!isHiddenBlog ? (
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-2xl font-bold text-[var(--gold)]">
+              POST {article.orderLabel}
+            </span>
+            <div className="h-px flex-1 bg-[var(--border)]" />
+          </div>
+        ) : (
+          <div className="mb-4 flex items-center gap-3">
+            <span className="rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-3 py-1 text-xs font-medium text-[var(--gold)]">
+              네이버 블로그 변환본
+            </span>
+            <div className="h-px flex-1 bg-[var(--border)]" />
+          </div>
+        )}
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <span className="rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2.5 py-1 text-xs text-[var(--gold)]">
             {article.categoryLabel}
@@ -164,12 +177,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         dangerouslySetInnerHTML={{ __html: html }}
       />
 
-      <div className="mt-14 border-t border-[var(--border)] pt-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ArticleNavigationCard article={older} direction="older" />
-          <ArticleNavigationCard article={newer} direction="newer" />
+      {!isHiddenBlog ? (
+        <div className="mt-14 border-t border-[var(--border)] pt-8">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <ArticleNavigationCard article={older} direction="older" />
+            <ArticleNavigationCard article={newer} direction="newer" />
+          </div>
         </div>
-      </div>
+      ) : null}
     </main>
   );
 }
