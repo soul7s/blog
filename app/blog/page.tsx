@@ -9,16 +9,22 @@ export default function HiddenBlogPage() {
   return (
     <main className="py-12">
       <header className="mb-10">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-2.5 py-1 text-xs font-medium text-[var(--gold)]">
-              숨김 변환본
-            </span>
-            <span className="text-xs text-[var(--muted-text)]">{articles.length}개</span>
-          </div>
+        <div className="mb-4 flex items-center gap-2">
+          <span className="rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-2.5 py-1 text-xs font-medium text-[var(--gold)]">
+            숨김 변환본
+          </span>
+          <span className="text-xs text-[var(--muted-text)]">{articles.length}개</span>
+        </div>
+        <h1 className="mb-3 text-2xl font-bold leading-tight text-[var(--text)] sm:text-3xl">
+          네이버 블로그 변환본 보관함
+        </h1>
+        <p className="max-w-2xl text-sm leading-relaxed text-[var(--muted-text)]">
+          메인 목록에는 노출하지 않고, 필요할 때만 버튼으로 들어오는 네이버 변환용 글 보관함입니다.
+        </p>
+        <div className="mt-5">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-3 py-1.5 text-xs font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--bg)]"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-4 py-2 text-sm font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--bg)]"
           >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
               <path
@@ -29,15 +35,9 @@ export default function HiddenBlogPage() {
                 strokeWidth="1.5"
               />
             </svg>
-            홈으로
+            홈으로 가기
           </Link>
         </div>
-        <h1 className="mb-3 text-2xl font-bold leading-tight text-[var(--text)] sm:text-3xl">
-          네이버 블로그 변환본 보관함
-        </h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-[var(--muted-text)]">
-          메인 목록에는 노출하지 않고, 필요할 때만 버튼으로 들어오는 네이버 변환용 글 보관함입니다.
-        </p>
       </header>
 
       <div className="flex flex-col gap-3">
