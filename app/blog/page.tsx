@@ -8,30 +8,29 @@ export default function HiddenBlogPage() {
 
   return (
     <main className="py-12">
-      <div className="mb-8">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--muted-text)] transition-colors hover:text-[var(--gold)]"
-        >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M10 3L5 8L10 13"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="1.5"
-            />
-          </svg>
-          홈으로
-        </Link>
-      </div>
-
       <header className="mb-10">
-        <div className="mb-4 flex items-center gap-2">
-          <span className="rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-2.5 py-1 text-xs font-medium text-[var(--gold)]">
-            숨김 변환본
-          </span>
-          <span className="text-xs text-[var(--muted-text)]">{articles.length}개</span>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-2.5 py-1 text-xs font-medium text-[var(--gold)]">
+              숨김 변환본
+            </span>
+            <span className="text-xs text-[var(--muted-text)]">{articles.length}개</span>
+          </div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-3 py-1.5 text-xs font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--bg)]"
+          >
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M10 3L5 8L10 13"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+              />
+            </svg>
+            홈으로
+          </Link>
         </div>
         <h1 className="mb-3 text-2xl font-bold leading-tight text-[var(--text)] sm:text-3xl">
           네이버 블로그 변환본 보관함
