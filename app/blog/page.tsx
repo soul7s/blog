@@ -47,6 +47,13 @@ export default function HiddenBlogPage() {
                     <span className="rounded-md bg-[var(--ep-num-bg)] px-2 py-0.5 text-xs text-[var(--muted-text)]">
                       네이버용
                     </span>
+                    <Link
+                      href={`/blog-copy/${encodeURIComponent(article.slug)}`}
+                      className="rounded-md border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2 py-0.5 text-xs text-[var(--gold)]"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      복사용 보기
+                    </Link>
                   </div>
                 </div>
               </div>
