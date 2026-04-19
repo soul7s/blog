@@ -378,12 +378,21 @@ function loadArticles() {
   return articles;
 }
 
+function applyOrderLabels(articles: Article[]) {
+  return articles.map((article, index) => ({
+    ...article,
+    orderLabel: String(index + 1).padStart(2, "0"),
+  }));
+}
+
 export function getAllArticles() {
-  return loadArticles().filter((article) => isVisibleCategory(article.categoryKey));
+  return applyOrderLabels(
+    loadArticles().filter((article) => isVisibleCategory(article.categoryKey)),
+  );
 }
 
 export function getAllArticlesIncludingHidden() {
-  return loadArticles();
+  return applyOrderLabels(loadArticles());
 }
 
 export function getArticleBySlug(slugSegments: string[]) {
@@ -391,12 +400,21 @@ export function getArticleBySlug(slugSegments: string[]) {
     decodeURIComponent(segment),
   );
 
+  const matchesSlug = (article: Article) =>
+    article.routeSegments.length === normalisedSegments.length &&
+    article.routeSegments.every(
+      (segment, index) => segment === normalisedSegments[index],
+    );
+
+  const visibleArticle = getAllArticles().find(matchesSlug);
+
+  if (visibleArticle) {
+    return visibleArticle;
+  }
+
   return getAllArticlesIncludingHidden().find(
     (article) =>
-      article.routeSegments.length === normalisedSegments.length &&
-      article.routeSegments.every(
-        (segment, index) => segment === normalisedSegments[index],
-      ),
+      matchesSlug(article),
   );
 }
 
