@@ -53,6 +53,7 @@ export type ArticlePreview = Pick<
   | "orderLabel"
   | "publishedAt"
   | "sectionLabel"
+  | "slug"
   | "summary"
   | "tags"
   | "title"
@@ -439,6 +440,7 @@ export function toArticlePreview(article: Article): ArticlePreview {
     orderLabel: article.orderLabel,
     publishedAt: article.publishedAt,
     sectionLabel: article.sectionLabel,
+    slug: article.slug,
     summary: article.summary,
     tags: article.tags,
     title: article.title,

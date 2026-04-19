@@ -48,34 +48,39 @@ export default function HiddenBlogPage() {
         ) : null}
 
         {articles.map((article) => (
-          <Link key={article.id} className="group block" href={article.urlPath}>
-            <article className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 transition-all duration-200 hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)]">
-              <div className="flex items-start gap-4">
-                <div className="min-w-0 flex-1">
+          <article
+            key={article.id}
+            className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 transition-all duration-200 hover:border-[var(--border-hover)] hover:bg-[var(--card-hover)]"
+          >
+            <div className="flex items-start gap-4">
+              <div className="min-w-0 flex-1">
+                <Link
+                  className="group block"
+                  href={article.urlPath}
+                >
                   <h2 className="mb-1 text-base font-semibold leading-snug text-[var(--text)] transition-colors group-hover:text-[var(--gold)]">
                     {article.title}
                   </h2>
-                  <p className="line-clamp-2 mb-3 text-sm leading-relaxed text-[var(--muted-text)]">
-                    {article.summary}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-[var(--muted-text)]">{article.displayDate}</span>
-                    <span className="text-xs text-[var(--muted-bg)]">·</span>
-                    <span className="rounded-md bg-[var(--ep-num-bg)] px-2 py-0.5 text-xs text-[var(--muted-text)]">
-                      네이버용
-                    </span>
-                    <Link
-                      href={`/blog-copy/${encodeURIComponent(article.slug)}`}
-                      className="rounded-md border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2 py-0.5 text-xs text-[var(--gold)]"
-                      onClick={(event) => event.stopPropagation()}
-                    >
-                      복사용 보기
-                    </Link>
-                  </div>
+                </Link>
+                <p className="line-clamp-2 mb-3 text-sm leading-relaxed text-[var(--muted-text)]">
+                  {article.summary}
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-[var(--muted-text)]">{article.displayDate}</span>
+                  <span className="text-xs text-[var(--muted-bg)]">·</span>
+                  <span className="rounded-md bg-[var(--ep-num-bg)] px-2 py-0.5 text-xs text-[var(--muted-text)]">
+                    네이버용
+                  </span>
+                  <Link
+                    href={`/blog-copy/${encodeURIComponent(article.slug)}`}
+                    className="rounded-md border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2 py-0.5 text-xs text-[var(--gold)]"
+                  >
+                    복사용 보기
+                  </Link>
                 </div>
               </div>
-            </article>
-          </Link>
+            </div>
+          </article>
         ))}
       </div>
     </main>

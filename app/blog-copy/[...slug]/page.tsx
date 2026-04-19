@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getArticleBySlug } from "@/lib/blog";
+import { CopyButton } from "@/components/copy-button";
+import { getAllArticlesIncludingHidden, getArticleBySlug } from "@/lib/blog";
 
 type BlogCopyPageProps = {
   params: Promise<{
@@ -11,7 +12,11 @@ type BlogCopyPageProps = {
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return [{ slug: ["2026-04-18-연말정산-소득공제와-세액공제-쉽게-정리"] }];
+  return getAllArticlesIncludingHidden()
+    .filter((article) => article.categoryKey === "blog")
+    .map((article) => ({
+      slug: [article.slug],
+    }));
 }
 
 function toCopyFriendlyText(markdown: string) {
@@ -71,13 +76,7 @@ export default async function BlogCopyPage({ params }: BlogCopyPageProps) {
             변환본 목록으로
           </Link>
         </div>
-        <button
-          type="button"
-          className="rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-3 py-1 text-xs font-medium text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--bg)]"
-          onClick={() => navigator.clipboard.writeText(copyText)}
-        >
-          전체 복사
-        </button>
+        <CopyButton text={copyText} />
       </div>
 
       <header className="mb-8">
