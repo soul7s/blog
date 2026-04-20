@@ -56,7 +56,7 @@ export default function HiddenBlogPage() {
               <div className="min-w-0 flex-1">
                 <Link
                   className="group block"
-                  href={article.urlPath}
+                  href={`/blog-copy/${encodeURIComponent(article.slug)}`}
                 >
                   <h2 className="mb-1 text-base font-semibold leading-snug text-[var(--text)] transition-colors group-hover:text-[var(--gold)]">
                     {article.title}
@@ -75,7 +75,13 @@ export default function HiddenBlogPage() {
                     href={`/blog-copy/${encodeURIComponent(article.slug)}`}
                     className="rounded-md border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2 py-0.5 text-xs text-[var(--gold)]"
                   >
-                    복사용 보기
+                    복사용 페이지
+                  </Link>
+                  <Link
+                    href={article.urlPath}
+                    className="rounded-md border border-[var(--border)] bg-[var(--card)] px-2 py-0.5 text-xs text-[var(--muted-text)]"
+                  >
+                    원문 보기
                   </Link>
                 </div>
               </div>
